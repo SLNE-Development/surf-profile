@@ -35,7 +35,7 @@ private val borderItem = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
 
 
 fun ownProfileMenu(player: Player) = menu(buildText {
-    localColored("Dein Profil".toSmallCaps(), TextDecoration.BOLD)
+    spacer("Dein Profil".toSmallCaps())
 }, height) {
     val surfPlayer = player.toSurfPlayer()
     val outlinePane = StaticPane(0, 0, width, height).apply {
@@ -55,7 +55,7 @@ fun ownProfileMenu(player: Player) = menu(buildText {
             GuiItem(
                 buildItem(Material.PLAYER_HEAD) {
                     displayName {
-                        variableValue(player.name.toSmallCaps(), TextDecoration.BOLD)
+                        localColored(player.name.toSmallCaps(), TextDecoration.BOLD)
                     }
 
                     editMeta(SkullMeta::class.java) {
@@ -104,6 +104,42 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                     }
                 }
             ), 3, 0)
+
+        addItem(GuiItem(buildItem(Material.POPPY) {
+            displayName {
+                localColored("Freunde".toSmallCaps(), TextDecoration.BOLD)
+            }
+
+            buildLore {
+                emptyLine()
+                line {
+                    variableValue("Beschreibung:".toSmallCaps())
+                }
+
+                line {
+                    note("Das Freundesystem ist derzeit nur über Commands verfügbar.")
+                }
+
+            }
+        }), 1, 0)
+
+        addItem(GuiItem(buildItem(Material.REPEATER) {
+            displayName {
+                localColored("Einstellungen".toSmallCaps(), TextDecoration.BOLD)
+            }
+
+            buildLore {
+                emptyLine()
+                line {
+                    variableValue("Beschreibung:".toSmallCaps())
+                }
+
+                line {
+                    note("Das Einstellungsmenü ist derzeit nicht verfügbar.")
+                }
+
+            }
+        }), 5, 0)
     }
 
     addPane(outlinePane)
