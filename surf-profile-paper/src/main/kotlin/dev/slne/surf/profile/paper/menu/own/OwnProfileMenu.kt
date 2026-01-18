@@ -20,9 +20,6 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 private const val width = 9
 private const val height = 5
@@ -85,7 +82,7 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                             variableValue("Server: ".toSmallCaps())
                         }
                         line {
-                            note(surfPlayer.currentServer ?: "Unbekannt")
+                            note(surfPlayer.currentServer?.name ?: "Unbekannt")
                         }
                         emptyLine()
                         line {
@@ -93,12 +90,7 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                         }
                         line {
                             note(
-                                dateTimeFormatter.format(
-                                    ZonedDateTime.ofInstant(
-                                        Instant.ofEpochMilli(surfPlayer.firstSeen ?: 0L),
-                                        ZoneId.of("Europe/Berlin")
-                                    )
-                                )
+                                surfPlayer.firstSeen?.format(dateTimeFormatter) ?: "Unbekannt"
                             )
                         }
                     }
