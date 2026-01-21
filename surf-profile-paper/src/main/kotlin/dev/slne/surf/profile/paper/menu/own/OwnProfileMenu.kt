@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.core.api.paper.util.toSurfPlayer
 import dev.slne.surf.playtime.api.surfPlaytimeApi
 import dev.slne.surf.profile.paper.integration.LuckPermsIntegration
+import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.profile.paper.util.formatSeconds
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -20,9 +21,6 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 private const val width = 9
 private const val height = 5
@@ -93,12 +91,7 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                         }
                         line {
                             note(
-                                dateTimeFormatter.format(
-                                    ZonedDateTime.ofInstant(
-                                        Instant.ofEpochMilli(surfPlayer.firstSeen ?: 0L),
-                                        ZoneId.of("Europe/Berlin")
-                                    )
-                                )
+                                surfPlayer.firstSeen?.format(dateTimeFormatter) ?: "Unbekannt"
                             )
                         }
                     }
@@ -133,13 +126,36 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                 line {
                     variableValue("Beschreibung:".toSmallCaps())
                 }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Chateinstellungen ändern")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Claneinstellungen anpassen")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Freundeseinstellungen verwalten")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Lobbyeinstellungen festlegen")
+                }
+                emptyLine()
 
                 line {
-                    note("Das Einstellungsmenü ist derzeit nicht verfügbar.")
+                    spacer("Klicke, um das Einstellungsmenü zu öffnen.")
                 }
 
             }
-        }), 5, 0)
+        }) {
+            SettingsIntegration.openMenu(it.whoClicked)
+        }, 5, 0)
     }
 
     addPane(outlinePane)
