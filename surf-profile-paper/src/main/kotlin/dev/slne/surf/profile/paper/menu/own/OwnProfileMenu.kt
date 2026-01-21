@@ -83,7 +83,7 @@ fun ownProfileMenu(player: Player) = menu(buildText {
                             variableValue("Server: ".toSmallCaps())
                         }
                         line {
-                            note(surfPlayer.currentServer ?: "Unbekannt")
+                            note(surfPlayer.currentServer?.name ?: "Unbekannt")
                         }
                         emptyLine()
                         line {
