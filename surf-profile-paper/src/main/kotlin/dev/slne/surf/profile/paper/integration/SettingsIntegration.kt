@@ -13,7 +13,7 @@ object SettingsIntegration {
             surfSettingsApi.openSettingsGui(player.uniqueId)
         } else {
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Profile: Internal Server error while handling settings hook. Is everything loaded correctly?")
             }
         }
