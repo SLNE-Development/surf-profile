@@ -23,6 +23,6 @@ surfPaperPluginApi {
 dependencies {
     api(project(":surf-profile-core"))
     compileOnly("net.luckperms:api:5.4")
-    compileOnly("dev.slne.surf.playtime:surf-playtime-api:1.21.11-1.0.2-SNAPSHOT")
-    compileOnly("dev.slne.surf.settings:surf-settings-api:1.21.11-2.0.0-SNAPSHOT")
+    compileOnly("dev.slne.surf.playtime:surf-playtime-api-paper:1.21.11-1.2.1-SNAPSHOT")
+    compileOnly("dev.slne.surf.settings:surf-settings-api:1.21.11-2.0.1-SNAPSHOT")
 }
