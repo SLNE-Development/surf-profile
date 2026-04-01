@@ -3,7 +3,7 @@ package dev.slne.surf.profile.paper.menu.own
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.core.api.paper.util.toSurfPlayer
-import dev.slne.surf.playtime.api.surfPlaytimeApi
+import dev.slne.surf.playtime.api.common.surfPlaytimeApi
 import dev.slne.surf.profile.paper.integration.LuckPermsIntegration
 import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.profile.paper.util.formatSeconds
