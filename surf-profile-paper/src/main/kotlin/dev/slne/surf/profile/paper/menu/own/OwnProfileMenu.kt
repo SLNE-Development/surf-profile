@@ -24,7 +24,7 @@ import org.bukkit.inventory.meta.SkullMeta
 
 fun ownProfileMenu(): AbstractSurfView = surfView("Dein Profil") {
     settings {
-        rows(5)
+        rows(3)
         cancelAllInteractions()
     }
 
@@ -32,7 +32,7 @@ fun ownProfileMenu(): AbstractSurfView = surfView("Dein Profil") {
         val player = this.player
         val surfPlayer = player.toSurfPlayer()
 
-        slot(4, 2) {
+        slot(2, 5) {
             withItem(buildItem(Material.PLAYER_HEAD) {
                 displayName {
                     localColored(player.name.toSmallCaps(), TextDecoration.BOLD)
@@ -84,7 +84,7 @@ fun ownProfileMenu(): AbstractSurfView = surfView("Dein Profil") {
             })
         }
 
-        slot(2, 2) {
+        slot(2, 3) {
             withItem(buildItem(Material.POPPY) {
                 displayName {
                     localColored("Freunde".toSmallCaps(), TextDecoration.BOLD)
@@ -102,7 +102,7 @@ fun ownProfileMenu(): AbstractSurfView = surfView("Dein Profil") {
             })
         }
 
-        slot(6, 2) {
+        slot(2, 7) {
             withItem(buildItem(Material.REPEATER) {
                 displayName {
                     localColored("Einstellungen".toSmallCaps(), TextDecoration.BOLD)
