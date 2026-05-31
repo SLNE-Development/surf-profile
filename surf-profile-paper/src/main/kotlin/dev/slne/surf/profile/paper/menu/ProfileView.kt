@@ -1,0 +1,264 @@
+package dev.slne.surf.profile.paper.menu
+
+import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.buildText
+import dev.slne.surf.api.core.messages.adventure.key
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.core.messages.joinToComponent
+import dev.slne.surf.api.paper.builder.buildItem
+import dev.slne.surf.api.paper.builder.buildLore
+import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.core.api.common.player.SurfPlayer
+import dev.slne.surf.profile.paper.hook.ClanHook
+import dev.slne.surf.profile.paper.hook.FriendsHook
+import dev.slne.surf.profile.paper.hook.SocialsHook
+import dev.slne.surf.profile.paper.hook.TrophyHook
+import dev.slne.surf.profile.paper.mapped.MappedClan
+import dev.slne.surf.profile.paper.mapped.MappedFriends
+import dev.slne.surf.profile.paper.mapped.MappedTrophy
+import dev.slne.surf.profile.paper.plugin
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ResolvableProfile
+import me.devnatan.inventoryframework.View
+import me.devnatan.inventoryframework.ViewConfigBuilder
+import me.devnatan.inventoryframework.context.RenderContext
+import net.kyori.adventure.text.format.TextColor
+import org.bukkit.Material
+import org.bukkit.inventory.ItemFlag
+
+@Suppress("UnstableApiUsage")
+object ProfileView : View() {
+    private val targetHolder = initialState<SurfPlayer>("target")
+
+    private val twitchNameHolder = mutableState("Lädt...")
+    private val discordNameHolder = mutableState("Lädt...")
+
+    private val trophiesHolder = mutableState(listOf(MappedTrophy.loading()))
+    private val friendsHolder = mutableState(MappedFriends.loading())
+    private val clansHolder = mutableState(MappedClan.loading())
+
+    override fun onInit(config: ViewConfigBuilder) {
+        config
+            .title("<shift:-8><glyph:profile-gui>")
+            .size(3)
+            .layout(
+                " PH      ",
+                " HH YFC  ",
+                " TD      "
+            )
+            .cancelInteractions()
+    }
+
+    override fun onFirstRender(render: RenderContext) {
+        val target = targetHolder.get(render)
+
+        plugin.launch {
+            if (plugin.hasSocialsHook()) {
+                twitchNameHolder.set(SocialsHook.getTwitchName(target.uuid) ?: "/", render)
+                discordNameHolder.set(SocialsHook.getDiscordName(target.uuid) ?: "/", render)
+            }
+
+            if (plugin.hasClanHook()) {
+                clansHolder.set(ClanHook.getMappedClan(target.uuid), render)
+            }
+
+            if (plugin.hasTrophiesHook()) {
+                trophiesHolder.set(TrophyHook.getTrophies(target.uuid), render)
+            }
+
+            if (plugin.hasFriendsHook()) {
+                friendsHolder.set(FriendsHook.getMappedFriends(target.uuid), render)
+            }
+        }
+
+        render.layoutSlot('P', create2DHead(target))
+        render.layoutSlot('H', createEmptyHeadItem(target))
+
+        render.layoutSlot('T').renderWith {
+            buildTwitchIcon(twitchNameHolder.get(render))
+        }.updateOnStateChange(twitchNameHolder)
+
+        render.layoutSlot('D').renderWith {
+            buildDiscordIcon(discordNameHolder.get(render))
+        }.updateOnStateChange(discordNameHolder)
+
+        render.layoutSlot('Y').renderWith {
+            createTrophiesItem(trophiesHolder.get(render))
+        }.updateOnStateChange(trophiesHolder).onClick { click ->
+            if (plugin.hasTrophiesHook()) {
+                TrophyHook.openTrophyMenu(target.uuid, click.player.uniqueId)
+            } else {
+                click.player.sendText {
+                    appendErrorPrefix()
+                    error("Die Trophäen sind hier nicht verfügbar.")
+                }
+            }
+        }
+
+        render.layoutSlot('F').renderWith {
+            createFriendsItem(friendsHolder.get(render))
+        }.updateOnStateChange(friendsHolder)
+
+        render.layoutSlot('C').renderWith {
+            createClansItem(clansHolder.get(render))
+        }.updateOnStateChange(clansHolder)
+    }
+
+    private fun create2DHead(surfPlayer: SurfPlayer) = buildItem(Material.PLAYER_HEAD) {
+        displayName {
+            variableValue(surfPlayer.username.toSmallCaps())
+        }
+
+        setData(DataComponentTypes.ITEM_MODEL, key("nexo", "2d_player_head_2x"))
+        setData(
+            DataComponentTypes.PROFILE, ResolvableProfile
+                .resolvableProfile()
+                .uuid(surfPlayer.uuid)
+                .build()
+        )
+
+        addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+    }
+
+    private fun createEmptyHeadItem(surfPlayer: SurfPlayer) = buildItem(Material.PAPER) {
+        displayName {
+            variableValue(surfPlayer.username.toSmallCaps())
+        }
+
+        setData(
+            DataComponentTypes.ITEM_MODEL,
+            key("nexo", "empty")
+        )
+    }
+
+    private fun buildTwitchIcon(name: String) = buildItem(Material.PAPER) {
+        displayName {
+            text("Twitch Verbindung", TextColor.fromHexString("#8956fb"))
+        }
+
+        setData(DataComponentTypes.ITEM_MODEL, key("nexo", "twitch-logo"))
+
+        buildLore {
+            emptyLine()
+            line {
+                darkSpacer(">")
+                appendSpace()
+                spacer("@")
+                text(name, TextColor.fromHexString("#8956fb"))
+            }
+        }
+    }
+
+    private fun buildDiscordIcon(name: String = "Lädt...") = buildItem(Material.PAPER) {
+        displayName {
+            text("Discord Verbindung", TextColor.fromHexString("#5865f2"))
+        }
+
+        setData(DataComponentTypes.ITEM_MODEL, key("nexo", "discord-logo"))
+
+        buildLore {
+            emptyLine()
+            line {
+                darkSpacer(">")
+                appendSpace()
+                spacer("@")
+                text(name, TextColor.fromHexString("#5865f2"))
+            }
+        }
+    }
+
+    private fun createTrophiesItem(trophies: List<MappedTrophy>) = buildItem(Material.GOLD_INGOT) {
+        displayName {
+            variableValue("Trophäen".toSmallCaps())
+        }
+
+        buildLore {
+            if (trophies.any { it.loading }) {
+                line {
+                    note("Lädt...")
+                }
+                return@buildLore
+            }
+
+            if (trophies.isEmpty()) {
+                line {
+                    note("Dieser Spieler hat noch keine Trophäen erhalten.")
+                }
+            } else {
+                line {
+                    primary("Erhaltene Trophäen: ")
+                    variableValue(trophies.size)
+                }
+                line {
+                    darkSpacer(">")
+                    appendSpace()
+                    append(trophies.sortedBy { it.receivedAt }
+                        .joinToComponent { buildText { variableValue(it.name.toSmallCaps()) } })
+                }
+            }
+        }
+    }
+
+    private fun createFriendsItem(friends: MappedFriends) = buildItem(Material.CANDLE) {
+        displayName {
+            variableValue("Freunde".toSmallCaps())
+        }
+
+        buildLore {
+            if (friends.loading) {
+                line {
+                    note("Lädt...")
+                }
+                return@buildLore
+            }
+
+            line {
+                primary("Anzahl Freunde: ")
+                variableValue(friends.friendCount)
+            }
+        }
+    }
+
+    private fun createClansItem(mappedClan: MappedClan) = buildItem(Material.TNT) {
+        displayName {
+            variableValue("Clans".toSmallCaps())
+        }
+
+        buildLore {
+            if (mappedClan.loading) {
+                line {
+                    note("Lädt...")
+                }
+                return@buildLore
+            }
+
+            if (mappedClan.empty) {
+                line {
+                    note("Dieser Spieler ist in keinem Clan.")
+                }
+            } else {
+                line {
+                    darkSpacer(">")
+                    appendSpace()
+                    primary("Clanname: ")
+                    variableValue(mappedClan.clanName.toSmallCaps())
+                }
+
+                line {
+                    darkSpacer(">")
+                    appendSpace()
+                    primary("Clan-Tag: ")
+                    variableValue(mappedClan.clanTag.toSmallCaps())
+                }
+
+                line {
+                    darkSpacer(">")
+                    appendSpace()
+                    primary("Rolle: ")
+                    variableValue(mappedClan.playersClanRole.toSmallCaps())
+                }
+            }
+        }
+    }
+}
