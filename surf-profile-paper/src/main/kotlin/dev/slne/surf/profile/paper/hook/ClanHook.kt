@@ -12,5 +12,5 @@ object ClanHook {
             playersClanRole = it.getMember(playerUuid)?.role?.name ?: "Unbekannt",
             clanMemberCount = it.members.size
         )
-    }
+    } ?: MappedClan.empty()
 }
