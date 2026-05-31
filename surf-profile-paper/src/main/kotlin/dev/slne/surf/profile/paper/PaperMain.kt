@@ -24,6 +24,6 @@ class PaperMain : SuspendingJavaPlugin() {
 
     fun hasClanHook() = pluginManager.isPluginEnabled("surf-clan-paper")
     fun hasFriendsHook() = pluginManager.isPluginEnabled("surf-friends-paper")
-    fun hasSocialsHook() = pluginManager.isPluginEnabled("surf-socials-paper")
+    fun hasSocialsHook() = pluginManager.isPluginEnabled("surf-social-paper")
     fun hasTrophiesHook() = pluginManager.isPluginEnabled("surf-trophy-paper")
 }

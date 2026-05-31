@@ -5,7 +5,7 @@ import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.key
 import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.core.messages.joinToComponent
+import dev.slne.surf.api.core.messages.joinToComponentNewLine
 import dev.slne.surf.api.paper.builder.buildItem
 import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
@@ -55,8 +55,11 @@ object ProfileView : View() {
 
         plugin.launch {
             if (plugin.hasSocialsHook()) {
-                twitchNameHolder.set(SocialsHook.getTwitchName(target.uuid) ?: "/", render)
-                discordNameHolder.set(SocialsHook.getDiscordName(target.uuid) ?: "/", render)
+                twitchNameHolder.set(SocialsHook.getTwitchName(target.uuid) ?: "Unbekannt", render)
+                discordNameHolder.set(
+                    SocialsHook.getDiscordName(target.uuid) ?: "Unbekannt",
+                    render
+                )
             }
 
             if (plugin.hasClanHook()) {
@@ -188,14 +191,19 @@ object ProfileView : View() {
                 }
             } else {
                 line {
-                    primary("Erhaltene Trophäen: ")
+                    info("Erhaltene Trophäen: ")
                     variableValue(trophies.size)
                 }
                 line {
-                    darkSpacer(">")
-                    appendSpace()
-                    append(trophies.sortedBy { it.receivedAt }
-                        .joinToComponent { buildText { variableValue(it.name.toSmallCaps()) } })
+                    append(
+                        trophies.sortedBy { it.receivedAt }.take(10)
+                            .joinToComponentNewLine {
+                                buildText {
+                                    darkSpacer(">")
+                                    appendSpace()
+                                    variableValue(it.name.toSmallCaps())
+                                }
+                            })
                 }
             }
         }
