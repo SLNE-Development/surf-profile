@@ -2,7 +2,6 @@ package dev.slne.surf.profile.paper.menu
 
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.api.core.font.toSmallCaps
-import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.key
 import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.paper.builder.buildItem
@@ -195,11 +194,9 @@ object ProfileView : View() {
                 }
                 trophies.sortedBy { it.receivedAt }.take(10).forEach {
                     line {
-                        buildText {
-                            darkSpacer(">")
-                            appendSpace()
-                            variableValue(it.name.toSmallCaps())
-                        }
+                        darkSpacer(">")
+                        appendSpace()
+                        variableValue(it.name.toSmallCaps())
                     }
                 }
             }
