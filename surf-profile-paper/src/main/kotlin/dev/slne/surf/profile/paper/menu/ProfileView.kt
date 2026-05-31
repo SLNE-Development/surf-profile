@@ -174,6 +174,7 @@ object ProfileView : View() {
         }
 
         buildLore {
+            emptyLine()
             if (trophies.any { it.loading }) {
                 line {
                     note("Lädt...")
@@ -206,6 +207,7 @@ object ProfileView : View() {
         }
 
         buildLore {
+            emptyLine()
             if (friends.loading) {
                 line {
                     note("Lädt...")
@@ -214,7 +216,7 @@ object ProfileView : View() {
             }
 
             line {
-                primary("Anzahl Freunde: ")
+                info("Anzahl Freunde: ")
                 variableValue(friends.friendCount)
             }
         }
@@ -222,10 +224,11 @@ object ProfileView : View() {
 
     private fun createClansItem(mappedClan: MappedClan) = buildItem(Material.TNT) {
         displayName {
-            variableValue("Clans".toSmallCaps())
+            variableValue("Clan".toSmallCaps())
         }
 
         buildLore {
+            emptyLine()
             if (mappedClan.loading) {
                 line {
                     note("Lädt...")
@@ -241,21 +244,21 @@ object ProfileView : View() {
                 line {
                     darkSpacer(">")
                     appendSpace()
-                    primary("Clanname: ")
+                    info("Clanname: ")
                     variableValue(mappedClan.clanName.toSmallCaps())
                 }
 
                 line {
                     darkSpacer(">")
                     appendSpace()
-                    primary("Clan-Tag: ")
+                    info("Clan-Tag: ")
                     variableValue(mappedClan.clanTag.toSmallCaps())
                 }
 
                 line {
                     darkSpacer(">")
                     appendSpace()
-                    primary("Rolle: ")
+                    info("Rolle: ")
                     variableValue(mappedClan.playersClanRole.toSmallCaps())
                 }
             }
