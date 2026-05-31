@@ -2,8 +2,12 @@ package dev.slne.surf.profile.paper.menu
 
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.luckperms.LuckPermsAccess
+import dev.slne.surf.api.core.luckperms.getMeta
+import dev.slne.surf.api.core.luckperms.prefix
 import dev.slne.surf.api.core.messages.adventure.key
 import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.core.minimessage.miniMessage
 import dev.slne.surf.api.paper.builder.buildItem
 import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
@@ -15,6 +19,7 @@ import dev.slne.surf.profile.paper.hook.TrophyHook
 import dev.slne.surf.profile.paper.mapped.MappedClan
 import dev.slne.surf.profile.paper.mapped.MappedFriends
 import dev.slne.surf.profile.paper.mapped.MappedTrophy
+import dev.slne.surf.profile.paper.mapped.MappedVerification
 import dev.slne.surf.profile.paper.plugin
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile
@@ -31,6 +36,7 @@ object ProfileView : View() {
 
     private val twitchNameHolder = mutableState("Lädt...")
     private val discordNameHolder = mutableState("Lädt...")
+    private val verificationHolder = mutableState(MappedVerification.loading())
 
     private val trophiesHolder = mutableState(listOf(MappedTrophy.loading()))
     private val friendsHolder = mutableState(MappedFriends.loading())
@@ -42,7 +48,7 @@ object ProfileView : View() {
             .size(3)
             .layout(
                 " PH      ",
-                " HH YFC  ",
+                " HV YFC  ",
                 " TD      "
             )
             .cancelInteractions()
@@ -71,10 +77,15 @@ object ProfileView : View() {
             if (plugin.hasFriendsHook()) {
                 friendsHolder.set(FriendsHook.getMappedFriends(target.uuid), render)
             }
+
+            verificationHolder.set(loadVerification(target), render)
         }
 
         render.layoutSlot('P', create2DHead(target))
         render.layoutSlot('H', createEmptyHeadItem(target))
+        render.layoutSlot('V').renderWith {
+            createVerifiedIcon(target, verificationHolder.get(render))
+        }.updateOnStateChange(verificationHolder)
 
         render.layoutSlot('T').renderWith {
             buildTwitchIcon(twitchNameHolder.get(render))
@@ -132,6 +143,38 @@ object ProfileView : View() {
             key("nexo", "empty")
         )
     }
+
+    private fun createVerifiedIcon(surfPlayer: SurfPlayer, verification: MappedVerification) =
+        buildItem(Material.PAPER) {
+            if (!verification.verified || verification.loading) {
+                displayName {
+                    variableValue(surfPlayer.username.toSmallCaps())
+                }
+
+                setData(
+                    DataComponentTypes.ITEM_MODEL,
+                    key("nexo", "empty")
+                )
+                return@buildItem
+            }
+
+            displayName {
+                success("✔ Verifiziert")
+            }
+
+            setData(DataComponentTypes.ITEM_MODEL, key("nexo", "verified"))
+
+            buildLore {
+                emptyLine()
+                line {
+                    append(verification.rank)
+                }
+
+                line {
+                    variableValue(verification.verificationText)
+                }
+            }
+        }
 
     private fun buildTwitchIcon(name: String) = buildItem(Material.PAPER) {
         displayName {
@@ -265,5 +308,21 @@ object ProfileView : View() {
                 }
             }
         }
+    }
+
+
+    private suspend fun loadVerification(surfPlayer: SurfPlayer): MappedVerification {
+        val luckPermsUser =
+            LuckPermsAccess.getUser(surfPlayer.uuid) ?: LuckPermsAccess.loadUser(surfPlayer.uuid)
+
+        val verified = luckPermsUser.getMeta<String>("verified")
+        val verificationText = luckPermsUser.getMeta<String>("verification_text", "Not verified")
+        val rank = "${luckPermsUser.prefix}${surfPlayer.username}"
+
+        return MappedVerification(
+            verified = verified?.toBoolean() ?: false,
+            verificationText = verificationText,
+            rank = miniMessage.deserialize(rank)
+        )
     }
 }
