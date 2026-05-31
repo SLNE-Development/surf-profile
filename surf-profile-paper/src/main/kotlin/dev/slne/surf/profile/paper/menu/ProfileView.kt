@@ -5,7 +5,6 @@ import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.key
 import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.core.messages.joinToComponentNewLine
 import dev.slne.surf.api.paper.builder.buildItem
 import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
@@ -194,16 +193,14 @@ object ProfileView : View() {
                     info("Erhaltene Trophäen: ")
                     variableValue(trophies.size)
                 }
-                line {
-                    append(
-                        trophies.sortedBy { it.receivedAt }.take(10)
-                            .joinToComponentNewLine {
-                                buildText {
-                                    darkSpacer(">")
-                                    appendSpace()
-                                    variableValue(it.name.toSmallCaps())
-                                }
-                            })
+                trophies.sortedBy { it.receivedAt }.take(10).forEach {
+                    line {
+                        buildText {
+                            darkSpacer(">")
+                            appendSpace()
+                            variableValue(it.name.toSmallCaps())
+                        }
+                    }
                 }
             }
         }
