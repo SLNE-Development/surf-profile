@@ -171,7 +171,7 @@ object ProfileView : View() {
                 }
 
                 line {
-                    variableValue(verification.verificationText)
+                    variableValue(verification.verificationText.toSmallCaps())
                 }
             }
         }
