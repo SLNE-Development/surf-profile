@@ -16,6 +16,7 @@ import dev.slne.surf.profile.paper.hook.ClanHook
 import dev.slne.surf.profile.paper.hook.FriendsHook
 import dev.slne.surf.profile.paper.hook.SocialsHook
 import dev.slne.surf.profile.paper.hook.TrophyHook
+import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.profile.paper.mapped.MappedClan
 import dev.slne.surf.profile.paper.mapped.MappedFriends
 import dev.slne.surf.profile.paper.mapped.MappedTrophy
@@ -23,10 +24,12 @@ import dev.slne.surf.profile.paper.mapped.MappedVerification
 import dev.slne.surf.profile.paper.plugin
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile
+import io.papermc.paper.datacomponent.item.TooltipDisplay
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.inventory.ItemFlag
 
@@ -49,7 +52,7 @@ object ProfileView : View() {
             .layout(
                 " PH      ",
                 " HV YFC  ",
-                " TD      "
+                " TD    S "
             )
             .cancelInteractions()
     }
@@ -115,6 +118,55 @@ object ProfileView : View() {
         render.layoutSlot('C').renderWith {
             createClansItem(clansHolder.get(render))
         }.updateOnStateChange(clansHolder)
+
+        render.layoutSlot('S', buildItem(Material.REPEATER) {
+            displayName {
+                red("Einstellungen".toSmallCaps())
+            }
+
+            buildLore {
+                emptyLine()
+                line {
+                    variableValue("Beschreibung:".toSmallCaps())
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Chateinstellungen ändern")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Claneinstellungen anpassen")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Freundeseinstellungen verwalten")
+                }
+                line {
+                    spacer("-")
+                    appendSpace()
+                    note("Lobbyeinstellungen festlegen")
+                }
+
+                emptyLine()
+                line {
+                    spacer("Klicke, um das Einstellungsmenü zu öffnen.")
+                }
+            }
+        }).displayIf { context ->
+            context.player.uniqueId == target.uuid
+        }.onClick { click ->
+            if (plugin.hasSettingsHook()) {
+                SettingsIntegration.openMenu(click.player)
+            } else {
+                click.player.sendText {
+                    appendErrorPrefix()
+                    error("Die Einstellungen sind hier nicht verfügbar.")
+                }
+            }
+        }
     }
 
     private fun create2DHead(surfPlayer: SurfPlayer) = buildItem(Material.PLAYER_HEAD) {
@@ -127,6 +179,13 @@ object ProfileView : View() {
             DataComponentTypes.PROFILE, ResolvableProfile
                 .resolvableProfile()
                 .uuid(surfPlayer.uuid)
+                .build()
+        )
+
+        setData(
+            DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay
+                .tooltipDisplay()
+                .hiddenComponents(setOf(DataComponentTypes.PROFILE))
                 .build()
         )
 
@@ -178,13 +237,16 @@ object ProfileView : View() {
 
     private fun buildTwitchIcon(name: String) = buildItem(Material.PAPER) {
         displayName {
-            text("Twitch Verbindung", TextColor.fromHexString("#8956fb"))
+            text(
+                "Twitch Link".toSmallCaps(),
+                TextColor.fromHexString("#8956fb"),
+                TextDecoration.BOLD
+            )
         }
 
         setData(DataComponentTypes.ITEM_MODEL, key("nexo", "twitch-logo"))
 
         buildLore {
-            emptyLine()
             line {
                 darkSpacer(">")
                 appendSpace()
@@ -196,13 +258,16 @@ object ProfileView : View() {
 
     private fun buildDiscordIcon(name: String = "Lädt...") = buildItem(Material.PAPER) {
         displayName {
-            text("Discord Verbindung", TextColor.fromHexString("#5865f2"))
+            text(
+                "Discord Link".toSmallCaps(),
+                TextColor.fromHexString("#5865f2"),
+                TextDecoration.BOLD
+            )
         }
 
         setData(DataComponentTypes.ITEM_MODEL, key("nexo", "discord-logo"))
 
         buildLore {
-            emptyLine()
             line {
                 darkSpacer(">")
                 appendSpace()

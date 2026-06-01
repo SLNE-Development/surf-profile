@@ -1,3 +1,4 @@
+import dev.slne.surf.api.gradle.util.registerRequired
 import dev.slne.surf.api.gradle.util.registerSoft
 
 plugins {
@@ -15,7 +16,7 @@ surfPaperPluginApi {
 
     serverDependencies {
         registerSoft("surf-playtime-paper")
-        registerSoft("surf-settings-paper")
+        registerRequired("surf-settings-paper")
         registerSoft("surf-clan-paper")
         registerSoft("surf-friends-paper")
         registerSoft("surf-trophy-paper")
