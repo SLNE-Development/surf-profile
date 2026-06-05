@@ -21,6 +21,13 @@ object SettingsIntegration {
     suspend fun hasDiscordEnabled(playerUuid: UUID) =
         SurfSettingsApi.getCachedValueOrLoad(playerUuid, discordPrivacySettingKey)
 
+    suspend fun setTwitchEnabled(playerUuid: UUID, enabled: Boolean) =
+        SurfSettingsApi.saveSetting(playerUuid, twitchPrivacySettingKey, enabled)
+
+    suspend fun setDiscordEnabled(playerUuid: UUID, enabled: Boolean) =
+        SurfSettingsApi.saveSetting(playerUuid, discordPrivacySettingKey, enabled)
+
+
     fun openMenu(player: Player) {
         SurfSettingsApi.openSettingsGui(player.uniqueId)
     }
