@@ -1,5 +1,6 @@
 package dev.slne.surf.profile.paper.hook
 
+import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.social.api.SurfSocialApi
 import dev.slne.surf.social.api.connection.impl.DiscordConnection
 import dev.slne.surf.social.api.connection.impl.TwitchConnection
@@ -8,8 +9,12 @@ import java.util.*
 
 object SocialsHook {
     suspend fun getTwitchName(playerUuid: UUID) =
-        SurfSocialApi.findConnection<TwitchConnection>(playerUuid)?.twitchName
+        if (SettingsIntegration.hasTwitchEnabled(playerUuid)) SurfSocialApi.findConnection<TwitchConnection>(
+            playerUuid
+        )?.twitchName else "/"
 
     suspend fun getDiscordName(playerUuid: UUID) =
-        SurfSocialApi.findConnection<DiscordConnection>(playerUuid)?.discordName
+        if (SettingsIntegration.hasDiscordEnabled(playerUuid)) SurfSocialApi.findConnection<DiscordConnection>(
+            playerUuid
+        )?.discordName else "/"
 }

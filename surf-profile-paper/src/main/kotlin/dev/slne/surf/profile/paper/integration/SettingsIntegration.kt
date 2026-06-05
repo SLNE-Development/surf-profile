@@ -16,10 +16,10 @@ object SettingsIntegration {
     }
 
     suspend fun hasTwitchEnabled(playerUuid: UUID) =
-        SurfSettingsApi.getSettingValue(playerUuid, twitchPrivacySettingKey)
+        SurfSettingsApi.getCachedValueOrLoad(playerUuid, twitchPrivacySettingKey)
 
     suspend fun hasDiscordEnabled(playerUuid: UUID) =
-        SurfSettingsApi.getSettingValue(playerUuid, discordPrivacySettingKey)
+        SurfSettingsApi.getCachedValueOrLoad(playerUuid, discordPrivacySettingKey)
 
     fun openMenu(player: Player) {
         SurfSettingsApi.openSettingsGui(player.uniqueId)
