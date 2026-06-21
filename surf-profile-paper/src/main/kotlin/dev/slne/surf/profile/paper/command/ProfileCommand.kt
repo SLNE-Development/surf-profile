@@ -14,6 +14,7 @@ import dev.slne.surf.core.api.paper.command.argument.surfOfflinePlayerArgument
 import dev.slne.surf.core.api.paper.util.surfPlayer
 import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.profile.paper.menu.ProfileView
+import net.luckperms.api.node.NodeType
 import net.luckperms.api.node.types.MetaNode
 
 fun profileCommand() = commandTree("profile") {
@@ -51,14 +52,13 @@ fun profileCommand() = commandTree("profile") {
                         )
 
                         val verificationTextKey = "verification_text"
-
-                        user.data().remove(MetaNode.builder().key(verificationTextKey).build())
-
                         val metaNode = MetaNode.builder()
                             .key(verificationTextKey)
                             .value(verificationText)
                             .build()
 
+                        user.data()
+                            .clear(NodeType.META.predicate { it.metaKey == verificationTextKey })
                         user.data().add(metaNode)
 
                         LuckPermsAccess.luckperms.userManager.saveUser(user).thenRun {
