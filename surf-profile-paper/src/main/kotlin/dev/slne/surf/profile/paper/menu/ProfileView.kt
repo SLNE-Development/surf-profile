@@ -5,6 +5,7 @@ import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.luckperms.LuckPermsAccess
 import dev.slne.surf.api.core.luckperms.getMeta
 import dev.slne.surf.api.core.luckperms.prefix
+import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.key
 import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.core.minimessage.miniMessage
@@ -28,6 +29,7 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
@@ -40,6 +42,7 @@ object ProfileView : View() {
     private val twitchNameHolder = mutableState("Lädt...")
     private val discordNameHolder = mutableState("Lädt...")
     private val verificationHolder = mutableState(MappedVerification.loading())
+    private val nameHolder = mutableState(Component.empty())
 
     private val trophiesHolder = mutableState(listOf(MappedTrophy.loading()))
     private val friendsHolder = mutableState(MappedFriends.loading())
@@ -59,6 +62,10 @@ object ProfileView : View() {
 
     override fun onFirstRender(render: RenderContext) {
         val target = targetHolder.get(render)
+
+        nameHolder.set(buildText {
+            white(target.username.toSmallCaps(), TextDecoration.BOLD)
+        }, render)
 
         plugin.launch {
             if (plugin.hasSocialsHook()) {
@@ -81,14 +88,25 @@ object ProfileView : View() {
                 friendsHolder.set(FriendsHook.getMappedFriends(target.uuid), render)
             }
 
+            nameHolder.set(buildText {
+                append(
+                    miniMessage.deserialize(
+                        LuckPermsAccess.getUser(target.uuid)?.prefix ?: LuckPermsAccess.loadUser(
+                            target.uuid
+                        ).prefix
+                    )
+                )
+                white(target.username.toSmallCaps(), TextDecoration.BOLD)
+            }, render)
+
             verificationHolder.set(loadVerification(target), render)
         }
 
         render.layoutSlot('P', create2DHead(target))
         render.layoutSlot('H', createEmptyHeadItem(target))
         render.layoutSlot('V').renderWith {
-            createVerifiedIcon(target, verificationHolder.get(render))
-        }.updateOnStateChange(verificationHolder)
+            createVerifiedIcon(target, verificationHolder.get(render), nameHolder.get(render))
+        }.updateOnStateChange(verificationHolder, nameHolder)
 
         render.layoutSlot('T').renderWith {
             buildTwitchIcon(twitchNameHolder.get(render))
@@ -203,13 +221,13 @@ object ProfileView : View() {
         )
     }
 
-    private fun createVerifiedIcon(surfPlayer: SurfPlayer, verification: MappedVerification) =
+    private fun createVerifiedIcon(
+        surfPlayer: SurfPlayer,
+        verification: MappedVerification,
+        name: Component
+    ) =
         buildItem(Material.PAPER) {
             if (!verification.verified || verification.loading) {
-                displayName {
-                    variableValue(surfPlayer.username.toSmallCaps())
-                }
-
                 setData(
                     DataComponentTypes.ITEM_MODEL,
                     key("nexo", "empty")
@@ -218,19 +236,25 @@ object ProfileView : View() {
             }
 
             displayName {
-                success("✔ Verifiziert")
+                append(name)
             }
 
             setData(DataComponentTypes.ITEM_MODEL, key("nexo", "verified"))
 
             buildLore {
-                emptyLine()
                 line {
-                    append(verification.rank)
+                    success("✔ Verifiziert")
                 }
+                emptyLine()
 
                 line {
-                    variableValue(verification.verificationText.toSmallCaps())
+                    variableValue("Beschreibung:".toSmallCaps())
+                }
+
+                buildRolesDisplay(verification).forEach {
+                    line {
+                        append(it)
+                    }
                 }
             }
         }
@@ -375,6 +399,14 @@ object ProfileView : View() {
         }
     }
 
+    private fun buildRolesDisplay(verification: MappedVerification): List<Component> =
+        verification.verificationText.split("<+>").map {
+            buildText {
+                spacer(">")
+                appendSpace()
+                white(it)
+            }
+        }
 
     private suspend fun loadVerification(surfPlayer: SurfPlayer): MappedVerification {
         val luckPermsUser =
@@ -382,12 +414,10 @@ object ProfileView : View() {
 
         val verified = luckPermsUser.getMeta<String>("verified")
         val verificationText = luckPermsUser.getMeta<String>("verification_text", "Not verified")
-        val rank = "${luckPermsUser.prefix}${surfPlayer.username}"
 
         return MappedVerification(
             verified = verified?.toBoolean() ?: false,
-            verificationText = verificationText,
-            rank = miniMessage.deserialize(rank)
+            verificationText = verificationText
         )
     }
 }
