@@ -1,8 +1,11 @@
 package dev.slne.surf.profile.paper.command
 
 import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.getValue
+import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.slne.surf.api.core.command.args.awaiting
+import dev.slne.surf.api.core.luckperms.LuckPermsAccess
 import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.paper.command.executors.playerExecutorSuspend
 import dev.slne.surf.api.paper.inventory.framework.viewFrame
@@ -11,6 +14,7 @@ import dev.slne.surf.core.api.paper.command.argument.surfOfflinePlayerArgument
 import dev.slne.surf.core.api.paper.util.surfPlayer
 import dev.slne.surf.profile.paper.integration.SettingsIntegration
 import dev.slne.surf.profile.paper.menu.ProfileView
+import net.luckperms.api.node.types.MetaNode
 
 fun profileCommand() = commandTree("profile") {
     withPermission("surf.profile.command.profile")
@@ -24,6 +28,48 @@ fun profileCommand() = commandTree("profile") {
             val target = arguments.awaiting<SurfPlayer>("target")
 
             viewFrame.open(ProfileView::class.java, player, mapOf("target" to target))
+        }
+    }
+
+    literalArgument("admin") {
+        withPermission("surf.profile.command.profile.admin")
+        literalArgument("setVerificationText") {
+            withPermission("surf.profile.command.profile.admin.setVerificationText")
+            surfOfflinePlayerArgument("target") {
+                greedyStringArgument("verificationText") {
+                    playerExecutorSuspend { player, arguments ->
+                        val target = arguments.awaiting<SurfPlayer>("target")
+                        val verificationText: String by arguments
+
+                        player.sendText {
+                            appendInfoPrefix()
+                            info("Der Verifizierungstext wird gespeichert...")
+                        }
+
+                        val user = LuckPermsAccess.getUser(target.uuid) ?: LuckPermsAccess.loadUser(
+                            target.uuid
+                        )
+
+                        val verificationTextKey = "verification_text"
+
+                        user.data().remove(MetaNode.builder().key(verificationTextKey).build())
+
+                        val metaNode = MetaNode.builder()
+                            .key(verificationTextKey)
+                            .value(verificationText)
+                            .build()
+
+                        user.data().add(metaNode)
+
+                        LuckPermsAccess.luckperms.userManager.saveUser(user).thenRun {
+                            player.sendText {
+                                appendSuccessPrefix()
+                                success("Der Verifizierungstext wurde gespeichert.")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

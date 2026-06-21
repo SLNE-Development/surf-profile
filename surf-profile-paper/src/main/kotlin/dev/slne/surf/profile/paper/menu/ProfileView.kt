@@ -55,7 +55,7 @@ object ProfileView : View() {
             .layout(
                 " PH      ",
                 " HV YFC  ",
-                " TD    S "
+                " TD     S"
             )
             .cancelInteractions()
     }
@@ -91,19 +91,26 @@ object ProfileView : View() {
             nameHolder.set(buildText {
                 append(
                     miniMessage.deserialize(
-                        LuckPermsAccess.getUser(target.uuid)?.prefix ?: LuckPermsAccess.loadUser(
-                            target.uuid
-                        ).prefix
+                        "${
+                            LuckPermsAccess.getUser(target.uuid)?.prefix ?: LuckPermsAccess.loadUser(
+                                target.uuid
+                            ).prefix
+                        }${target.username}"
                     )
                 )
-                white(target.username.toSmallCaps(), TextDecoration.BOLD)
             }, render)
 
             verificationHolder.set(loadVerification(target), render)
         }
 
-        render.layoutSlot('P', create2DHead(target))
-        render.layoutSlot('H', createEmptyHeadItem(target))
+        render.layoutSlot('P').renderWith {
+            create2DHead(target, nameHolder.get(render))
+        }.updateOnStateChange(nameHolder)
+
+        render.layoutSlot('H').renderWith {
+            createEmptyHeadItem(target, nameHolder.get(render))
+        }.updateOnStateChange(nameHolder)
+
         render.layoutSlot('V').renderWith {
             createVerifiedIcon(target, verificationHolder.get(render), nameHolder.get(render))
         }.updateOnStateChange(verificationHolder, nameHolder)
@@ -187,39 +194,41 @@ object ProfileView : View() {
         }
     }
 
-    private fun create2DHead(surfPlayer: SurfPlayer) = buildItem(Material.PLAYER_HEAD) {
-        displayName {
-            variableValue(surfPlayer.username.toSmallCaps())
+    private fun create2DHead(surfPlayer: SurfPlayer, name: Component) =
+        buildItem(Material.PLAYER_HEAD) {
+            displayName {
+                append(name)
+            }
+
+            setData(DataComponentTypes.ITEM_MODEL, key("nexo", "2d_player_head_2x"))
+            setData(
+                DataComponentTypes.PROFILE, ResolvableProfile
+                    .resolvableProfile()
+                    .uuid(surfPlayer.uuid)
+                    .build()
+            )
+
+            setData(
+                DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay
+                    .tooltipDisplay()
+                    .hiddenComponents(setOf(DataComponentTypes.PROFILE))
+                    .build()
+            )
+
+            addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
         }
 
-        setData(DataComponentTypes.ITEM_MODEL, key("nexo", "2d_player_head_2x"))
-        setData(
-            DataComponentTypes.PROFILE, ResolvableProfile
-                .resolvableProfile()
-                .uuid(surfPlayer.uuid)
-                .build()
-        )
+    private fun createEmptyHeadItem(surfPlayer: SurfPlayer, name: Component) =
+        buildItem(Material.PAPER) {
+            displayName {
+                append(name)
+            }
 
-        setData(
-            DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay
-                .tooltipDisplay()
-                .hiddenComponents(setOf(DataComponentTypes.PROFILE))
-                .build()
-        )
-
-        addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
-    }
-
-    private fun createEmptyHeadItem(surfPlayer: SurfPlayer) = buildItem(Material.PAPER) {
-        displayName {
-            variableValue(surfPlayer.username.toSmallCaps())
+            setData(
+                DataComponentTypes.ITEM_MODEL,
+                key("nexo", "empty")
+            )
         }
-
-        setData(
-            DataComponentTypes.ITEM_MODEL,
-            key("nexo", "empty")
-        )
-    }
 
     private fun createVerifiedIcon(
         surfPlayer: SurfPlayer,
