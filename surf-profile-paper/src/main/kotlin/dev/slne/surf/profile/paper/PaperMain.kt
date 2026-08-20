@@ -10,7 +10,7 @@ val plugin get() = JavaPlugin.getPlugin(PaperMain::class.java)
 
 class PaperMain : SuspendingJavaPlugin() {
     override fun onLoad() {
-        ownProfileMenu().register()
+        ownProfileMenu.register()
     }
 
     override fun onEnable() {
