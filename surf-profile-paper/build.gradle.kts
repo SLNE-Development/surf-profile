@@ -16,13 +16,11 @@ surfPaperPluginApi {
     serverDependencies {
         registerSoft("surf-playtime-paper")
         registerSoft("surf-settings-paper")
-        register("LuckPerms")
     }
 }
 
 dependencies {
-    api(projects.surfProfileApi)
-    compileOnly("net.luckperms:api:5.4")
+    api(projects.surfProfileCoreClient)
     compileOnly("dev.slne.surf.playtime:surf-playtime-api-paper:+")
     compileOnly("dev.slne.surf.settings:surf-settings-api:+")
 }

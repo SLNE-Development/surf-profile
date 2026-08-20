@@ -1,4 +1,4 @@
-package dev.slne.surf.profile.paper.util
+package dev.slne.surf.profile.core.client.util
 
 fun Long.formatSeconds(): String {
     val hours = this / 3600

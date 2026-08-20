@@ -1,4 +1,4 @@
-package dev.slne.surf.profile.paper.integration
+package dev.slne.surf.profile.core.client.integration
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage

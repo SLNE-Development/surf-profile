@@ -3,11 +3,12 @@ package dev.slne.surf.profile.paper.command
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.slne.surf.api.paper.inventory.framework.open
+import dev.slne.surf.profile.core.client.permission.ProfilePermissions
 import dev.slne.surf.profile.paper.menu.own.ownProfileMenu
 
 fun profileCommand() = commandTree("profile") {
-    withPermission("surf.profile.command.profile")
+    withPermission(ProfilePermissions.COMMAND_PROFILE)
     playerExecutor { player, _ ->
-        ownProfileMenu().open(player)
+        ownProfileMenu.open(player)
     }
 }

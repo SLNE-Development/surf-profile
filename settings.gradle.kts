@@ -1,5 +1,7 @@
 include("surf-profile-api")
+include("surf-profile-core-client")
 include("surf-profile-paper")
+include("surf-profile-minestom")
 
 pluginManagement {
     repositories {
