@@ -37,16 +37,21 @@ object OwnProfileMenuContent {
         localColored(playerName.toSmallCaps(), TextDecoration.BOLD)
     }
 
+    private val rangLabel = buildText { variableValue("Rang: ".toSmallCaps()) }
+    private val sessionLabel = buildText { variableValue("Aktuelle Session: ".toSmallCaps()) }
+    private val serverLabel = buildText { variableValue("Server: ".toSmallCaps()) }
+    private val firstLoginLabel = buildText { variableValue("Erster Login: ".toSmallCaps()) }
+
     /**
      * The lore of the head item, describing [surfPlayer]'s rank, session, server and first login.
      */
     fun headLore(surfPlayer: SurfPlayer): Array<TextComponent> = arrayOf(
         empty(),
-        buildText { variableValue("Rang: ".toSmallCaps()) },
+        rangLabel,
         buildText { append(LuckPermsIntegration.getRang(surfPlayer.uuid)) },
 
         empty(),
-        buildText { variableValue("Aktuelle Session: ".toSmallCaps()) },
+        sessionLabel,
         buildText {
             note(
                 surfPlaytimeApi.getCurrentPlaytimeSession(surfPlayer.uuid)
@@ -56,11 +61,11 @@ object OwnProfileMenuContent {
         },
 
         empty(),
-        buildText { variableValue("Server: ".toSmallCaps()) },
+        serverLabel,
         buildText { note(surfPlayer.currentServer?.name ?: "Unbekannt") },
 
         empty(),
-        buildText { variableValue("Erster Login: ".toSmallCaps()) },
+        firstLoginLabel,
         buildText { note(surfPlayer.firstSeen?.format(dateTimeFormatter) ?: "Unbekannt") },
     )
 

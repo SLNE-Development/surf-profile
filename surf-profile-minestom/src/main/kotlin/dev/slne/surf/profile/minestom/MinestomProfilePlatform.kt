@@ -12,6 +12,6 @@ import java.util.*
 class MinestomProfilePlatform : ProfilePlatform {
     override fun openOwnProfileMenu(playerUuid: UUID) {
         val player = ConnectionManager.getOnlineLobbyPlayerByUuid(playerUuid) ?: return
-        ownProfileMenu.open(player)
+        player.scheduleNextTick { ownProfileMenu.open(player) }
     }
 }
