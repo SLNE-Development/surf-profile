@@ -2,8 +2,22 @@ plugins {
     id("dev.slne.surf.api.gradle.minestom")
 }
 
+repositories {
+    mavenLocal()
+}
+
 surfMinestomApi {
     withCoreMinestom()
+}
+
+minestomPluginFile {
+    main = "dev.slne.surf.profile.minestom.SurfProfileMinestomPlugin"
+    authors = listOf("red")
+
+    pluginDependencies {
+        register("surf-settings-minestom")
+        register("surf-playtime-minestom")
+    }
 }
 
 dependencies {
