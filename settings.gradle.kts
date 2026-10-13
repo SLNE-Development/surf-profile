@@ -5,7 +5,6 @@ include("surf-profile-minestom")
 
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         maven("https://reposilite.slne.dev/releases")
     }
