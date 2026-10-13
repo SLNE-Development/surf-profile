@@ -2,10 +2,6 @@ plugins {
     id("dev.slne.surf.api.gradle.minestom")
 }
 
-repositories {
-    mavenLocal()
-}
-
 surfMinestomApi {
     withCoreMinestom()
 }
