@@ -1,22 +1,16 @@
 package dev.slne.surf.profile.minestom
 
-import com.google.auto.service.AutoService
-import dev.slne.minestom.lobby.api.plugin.MinestomPlugin
-import dev.slne.minestom.lobby.api.plugin.annotation.MinestomPluginMeta
-import dev.slne.surf.profile.minestom.command.ProfileCommandRegistrar
+import dev.slne.surf.api.minestom.inventory.framework.register
+import dev.slne.surf.api.minestom.plugin.SurfMinestomPlugin
+import dev.slne.surf.profile.minestom.command.profileCommand
+import dev.slne.surf.profile.minestom.menu.own.ownProfileMenu
 
-@AutoService(MinestomPlugin::class)
-@MinestomPluginMeta(
-    "surf-profile-minestom",
-    dependsOn = [
-        "surf-api-minestom",
-        "surf-settings-minestom",
-        "surf-playtime-minestom"
-    ]
-)
-class SurfProfileMinestomPlugin :
-    MinestomPlugin(SurfProfileMinestomEntrypoint::class.java) {
-    override fun configurePlugin() {
-        bindCommandRegistrar<ProfileCommandRegistrar>()
+object SurfProfileMinestomPlugin : SurfMinestomPlugin() {
+    override suspend fun onLoad() {
+        ownProfileMenu.register()
+    }
+
+    override suspend fun onEnable() {
+        profileCommand()
     }
 }
